@@ -1,6 +1,6 @@
 import { getProvider } from "../config/providers.jsx";
 
-export default function ProviderPage({ providers, onSelect }) {
+export default function ProviderPage({ providers, loading, error, onSelect }) {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 28px 80px" }}>
       {/* Hero */}
@@ -30,35 +30,47 @@ export default function ProviderPage({ providers, onSelect }) {
         </p>
       </div>
 
-      {/* Provider cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-          gap: 24,
-        }}
-      >
-        {providers.map((key) => {
-          const p = getProvider(key);
-          return (
-            <ProviderCard
-              key={key}
-              provider={p}
-              onClick={() => onSelect(key)}
-            />
-          );
-        })}
-      </div>
-
-      {/* Footer hint */}
-      {/* <p style={{
-        textAlign: "center",
-        marginTop: 56,
-        fontSize: 13,
-        color: "var(--text-dim)",
-      }}>
-        New providers appear automatically when schemas are added to the backend.
-      </p> */}
+      {loading ? (
+        <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px" }}>
+          <div style={{ fontSize: 24, marginBottom: 16 }}>⏳</div>
+          Loading cloud providers from backend...
+        </div>
+      ) : error ? (
+        <div style={{ 
+          textAlign: "center", 
+          padding: "24px", 
+          background: "var(--error-bg)", 
+          border: "1px solid var(--error-border)", 
+          borderRadius: 12,
+          color: "var(--error)"
+        }}>
+          <strong>Error connecting to backend API:</strong> {error}
+          <p style={{ marginTop: 8, fontSize: 13 }}>Make sure the backend is running on http://localhost:5000</p>
+        </div>
+      ) : providers.length === 0 ? (
+        <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px" }}>
+          No cloud providers or resources found in the backend schemas directory.
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {providers.map((key) => {
+            const p = getProvider(key);
+            return (
+              <ProviderCard
+                key={key}
+                provider={p}
+                onClick={() => onSelect(key)}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

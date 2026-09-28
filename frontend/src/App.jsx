@@ -597,6 +597,8 @@ function FormPage({ selectedResource, providerKey, onBack }) {
 
 function AppInner() {
   const [allResources, setAllResources] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(true);
+  const [error, setError] = useState(null);
 
   // view: "home" | { type: "list", provider } | { type: "form", provider, resource }
   const [view, setView] = useState("home");
@@ -604,7 +606,12 @@ function AppInner() {
   useEffect(() => {
     axios.get(`${API_BASE}/resources`).then((res) => {
       setAllResources(res.data.data || []);
-    }).catch(console.error);
+      setLoadingResources(false);
+    }).catch((err) => {
+      console.error(err);
+      setError(err.message || "Failed to fetch resources");
+      setLoadingResources(false);
+    });
   }, []);
 
   // Derive unique provider keys from resources, preserving insertion order
@@ -638,6 +645,8 @@ function AppInner() {
       {view === "home" && (
         <ProviderPage
           providers={providerKeys}
+          loading={loadingResources}
+          error={error}
           onSelect={(key) => setView({ type: "list", provider: key })}
         />
       )}
